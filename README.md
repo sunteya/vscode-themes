@@ -1,5 +1,15 @@
 # vscode-themes-kai README
 
+## Usage
+
+1. Build and package
+   ```bash
+   pnpm install
+   pnpm run build-themes
+   pnpm run package
+   ```
+2. Install the generated `.vsix` file in Visual Studio Code.
+
 ## Working with Markdown
 
 You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
