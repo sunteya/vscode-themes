@@ -1,0 +1,15 @@
+{
+	"colors": {
+		"editor.background": "#14141F",
+		"editorGutter.background": "#14141F",
+		"editorGroup.emptyBackground": "#14141F",
+		"sideBar.background": "#101019",
+		"editorWhitespace.foreground": "#45475a80",
+		"editorRuler.foreground": "#45475a40",
+		"editorIndentGuide.background1": "#45475a80",
+		"editorIndentGuide.activeBackground1": "#45475a",
+		"tree.inactiveIndentGuidesStroke": "#45475a80",
+		"tree.indentGuidesStroke": "#45475a",
+	},
+	"tokenColors": []
+}

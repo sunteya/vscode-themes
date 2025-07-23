@@ -1,0 +1,54 @@
+{
+  "name": "vscode-themes-kai",
+  "displayName": "VSCode Themes Kai",
+  "description": "VSCode themes for Cursor Dark Kai and Catppuccin Mocha Kai",
+  "version": "25.7.0",
+  "publisher": "sunteya",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sunteya/vscode-themes"
+  },
+  "type": "module",
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Cursor Dark Kai",
+        "uiTheme": "vs-dark",
+        "path": "./themes/cursor-dark-kai-color-theme.json"
+      },
+      {
+        "label": "Catppuccin Mocha Kai",
+        "uiTheme": "vs-dark",
+        "path": "./themes/catppuccin-mocha-kai-color-theme.json"
+      },
+      {
+        "label": "Kiro Dark Kai",
+        "uiTheme": "vs-dark",
+        "path": "./themes/kiro-dark-kai-color-theme.json"
+      },
+      {
+        "label": "Dark Modern Kai",
+        "uiTheme": "vs-dark",
+        "path": "./themes/dark-modern-kai-color-theme.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build-themes": "./scripts/build-themes.sh",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "jsonc-parser": "^3.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vsce": "^2.15.0"
+  }
+}
