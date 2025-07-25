@@ -9,7 +9,7 @@
         "punctuation.definition.comment"
       ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": null
       }
     },
     {
@@ -21,7 +21,7 @@
         "variable.function"
       ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": null
       }
     },
     {
@@ -33,7 +33,7 @@
         "entity.name.struct"
       ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": null
       }
     },
     {
@@ -44,7 +44,7 @@
         "entity.name.type"
       ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": null
       }
     },
     {
@@ -53,13 +53,24 @@
         "meta.function.parameters"
       ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": null
       }
     },
+
     {
-      "scope": "punctuation.decorator.ts",
+      "scope": [ "meta.decorator.ts" ],
       "settings": {
-        "fontStyle": ""
+        "fontStyle": "italic"
+      }
+    },
+
+    {
+      "scope": [
+        "meta.tag.other.unrecognized.html.derivative entity.name.tag"
+      ],
+      "settings": {
+        "foreground": "#89b4faa8", // opacity 66%
+        "fontStyle": "italic"
       }
     }
   ]

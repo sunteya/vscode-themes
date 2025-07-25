@@ -6,16 +6,16 @@ import { overwriteTheme, deepMergeTheme, readThemeFile } from '../lib/theme-util
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const root = path.join(__dirname, '..')
 
-const finalThemePath = path.join(root, 'themes/cursor-dark-kai-color-theme.json')
+const finalThemePath = path.join(root, 'themes/github-dark-default-kai-color-theme.json')
 
 try {
-    console.log('--- Generating final theme ---')
+    console.log('--- Generating final theme: Dark Modern Kai ---')
 
     const catppuccin = readThemeFile(path.join(root, 'vendor/catppuccin-mocha-3.17.0.json'))
     const finalTheme = deepMergeTheme(
         overwriteTheme(
             readThemeFile(finalThemePath),
-            { colors: readThemeFile(path.join(root, 'vendor/cursor-dark-1.2.4.jsonc')).colors },
+            { colors: readThemeFile(path.join(root, 'vendor/github-dark-default-6.3.5.json')).colors },
             { tokenColors: catppuccin.tokenColors, semanticTokenColors: catppuccin.semanticTokenColors }
         ),
         readThemeFile(path.join(root, 'vendor/catppuccin-reduce-italic.jsonc'))

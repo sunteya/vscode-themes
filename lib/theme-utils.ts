@@ -1,9 +1,9 @@
 import * as fs from 'fs'
 import { parse } from 'jsonc-parser'
+import _ from 'lodash'
 
 interface TokenColor {
-    name?: string
-    scope: string | string[]
+    scope: string[] | string
     settings: {
         foreground?: string
         fontStyle?: string
@@ -13,6 +13,8 @@ interface TokenColor {
 interface Theme {
     colors: Record<string, string>
     tokenColors: TokenColor[]
+    semanticHighlighting?: boolean
+    semanticTokenColors?: Record<string, any>
 }
 
 export function readThemeFile(filePath: string): Theme {
@@ -38,12 +40,74 @@ export function overwriteTheme(baseTheme: Theme, ...sources: Partial<Theme>[]): 
         if ('tokenColors' in source) {
             filteredSource.tokenColors = source.tokenColors
         }
+        if ('semanticHighlighting' in source) {
+            filteredSource.semanticHighlighting = source.semanticHighlighting
+        }
+        if ('semanticTokenColors' in source) {
+            filteredSource.semanticTokenColors = source.semanticTokenColors
+        }
         return filteredSource
     })
 
     const mergedTheme: Theme = { ...baseTheme }
     Object.assign(mergedTheme, ...themesToMerge)
     return mergedTheme
+}
+
+function deepMergeTokenColor(baseTokenColors: TokenColor[], newRule: TokenColor): TokenColor[] {
+    const result: TokenColor[][] = []
+    const scopeToIndex = new Map<string, number>()
+    for (const [index, rule] of baseTokenColors.entries()) {
+        const scopes = Array.isArray(rule.scope) ? rule.scope : [ rule.scope ]
+        result.push([ _.cloneDeep(rule) ])
+
+        for (const scope of scopes) {
+            scopeToIndex.set(scope, index)
+        }
+    }
+
+    const { scope: newScopes, settings: newSettings } = newRule
+
+    const scopesByGroup = new Map<number | null, string[]>()
+    for (const scope of Array.isArray(newScopes) ? newScopes : [ newScopes ]) {
+        const index = scopeToIndex.get(scope) ?? null
+        if (!scopesByGroup.has(index)) {
+            scopesByGroup.set(index, [])
+        }
+        scopesByGroup.get(index)!.push(scope)
+    }
+
+    for (const [index, scopes] of scopesByGroup.entries()) {
+        if (index === null) {
+            result.push([{ scope: scopes, settings: _.cloneDeep(newSettings) }])
+        } else {
+            const scopesFromNewRule = scopes
+            const ruleInGroup = result[index][0]
+            const ruleScopes = Array.isArray(ruleInGroup.scope) ? ruleInGroup.scope : ruleInGroup.scope.split(' ')
+            const scopesInGroupToModify = new Set<string>(scopesFromNewRule)
+
+            const intersectingScopes = ruleScopes.filter(s => scopesInGroupToModify.has(s))
+            const remainingScopes = ruleScopes.filter(s => !scopesInGroupToModify.has(s))
+
+            if (remainingScopes.length > 0) {
+                result[index][0] = { ...ruleInGroup, scope: remainingScopes }
+            } else {
+                result[index] = []
+            }
+
+            if (intersectingScopes.length > 0) {
+                const mergedSettings = { ...ruleInGroup.settings, ...newSettings }
+                for (const key of Object.keys(newSettings)) {
+                    if ((newSettings as any)[key] === null) {
+                        delete (mergedSettings as any)[key]
+                    }
+                }
+                result[index].push({ ...ruleInGroup, scope: intersectingScopes, settings: mergedSettings })
+            }
+        }
+    }
+
+    return result.flat()
 }
 
 /**
@@ -67,43 +131,19 @@ export function deepMergeTheme(baseTheme: Theme, ...sources: Partial<Theme>[]): 
         }
 
         // 2. Intelligently merge 'tokenColors'
-        const createScopeMap = (tokenColors: TokenColor[] = []): Map<string, object> => {
-            const map = new Map<string, object>()
-            for (const rule of tokenColors) {
-                const scopes = Array.isArray(rule.scope) ? rule.scope : [rule.scope]
-                for (const scope of scopes) {
-                    map.set(scope, rule.settings)
+        let finalTokenColors = mergedTheme.tokenColors
+        for (const newRule of source.tokenColors ?? []) {
+            finalTokenColors = deepMergeTokenColor(finalTokenColors, newRule)
+        }
+
+        // 3. Smartly merge the 'semanticTokenColors' object
+        const newSemanticTokenColors: Record<string, any> = { ...mergedTheme.semanticTokenColors }
+        if (source.semanticTokenColors) {
+            for (const [key, value] of Object.entries(source.semanticTokenColors)) {
+                if (value !== undefined) {
+                    newSemanticTokenColors[key] = value
                 }
             }
-            return map
-        }
-
-        const baseScopeMap = createScopeMap(mergedTheme.tokenColors)
-        const newScopeMap = createScopeMap(source.tokenColors)
-
-        // Intelligently merge the scopes, combining settings from the new theme into the base
-        for (const [scope, newSettings] of newScopeMap.entries()) {
-            const oldSettings = baseScopeMap.get(scope) || {}
-            baseScopeMap.set(scope, { ...oldSettings, ...newSettings })
-        }
-
-        const finalScopeMap = baseScopeMap
-
-        const settingsToScopesMap = new Map<string, string[]>()
-        for (const [scope, settings] of finalScopeMap.entries()) {
-            const settingsKey = JSON.stringify(settings)
-            if (!settingsToScopesMap.has(settingsKey)) {
-                settingsToScopesMap.set(settingsKey, [])
-            }
-            settingsToScopesMap.get(settingsKey)!.push(scope)
-        }
-
-        const finalTokenColors: TokenColor[] = []
-        for (const [settingsKey, scopes] of settingsToScopesMap.entries()) {
-            finalTokenColors.push({
-                scope: scopes.length === 1 ? scopes[0] : scopes.sort(),
-                settings: JSON.parse(settingsKey),
-            })
         }
 
         // Update the merged theme for the next iteration
@@ -112,6 +152,7 @@ export function deepMergeTheme(baseTheme: Theme, ...sources: Partial<Theme>[]): 
             ...source,
             colors: newMergedColors,
             tokenColors: finalTokenColors,
+            semanticTokenColors: newSemanticTokenColors,
         }
     }
 

@@ -14,10 +14,10 @@ try {
     const finalTheme = deepMergeTheme(
         overwriteTheme(
             readThemeFile(finalThemePath),
-            readThemeFile(path.join(root, 'vendor/catppuccin-mocha-3.17.0.jsonc'))
+            readThemeFile(path.join(root, 'vendor/catppuccin-mocha-3.17.0.json'))
         ),
         readThemeFile(path.join(root, 'vendor/catppuccin-mocha-colors.jsonc')),
-        readThemeFile(path.join(root, 'vendor/catppuccin-without-italic.json'))
+        readThemeFile(path.join(root, 'vendor/catppuccin-reduce-italic.jsonc'))
     )
 
     fs.writeFileSync(finalThemePath, JSON.stringify(finalTheme, null, '	'), 'utf-8')
